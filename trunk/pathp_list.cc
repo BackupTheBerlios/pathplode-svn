@@ -59,8 +59,10 @@ void pathp_list::set_list_from_string(string path_string) {
     path_element = path_string.substr(0, sep_pos);
     if (purge_trailing_slash) {
       path_unslash_r(path_element);
-    }    
-    paths.push_back(path_element);
+    }
+    if (path_element.size()>0 || allow_empty) {
+      paths.push_back(path_element);
+    }
     path_string.erase(0, sep_pos+1);
   } while (sep_pos!=-1);
 }
@@ -70,6 +72,7 @@ pathp_list::pathp_list(string path_string) {
   separator = separator_default;
   this->set_list_from_string(path_string);
   pattern_hook = none;
+  allow_empty=false;
   use_colour = false;
   // this is set to false for speed... if we have purge_trailing_slash (default)
   // it is useless anyway

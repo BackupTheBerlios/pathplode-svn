@@ -52,10 +52,8 @@ Commands:\n\
   --remove-all(-d) <element>: remove all occurrences of element\n\
   --uniquify(-u): remove all multiple entries, just leaving the first one \n\
   --list(-t): List all path entries, each on its own line\n\
-Options:  \n\
+Local options:  \n\
   --reset-options(-r): reset options to their default values for the following commands.\n\
-  --unique(-U): remove multiple entries. Only the entry with the\n\
-          highest priority is left over.\n\
   --after(-A) <anchor>: modify append/prepend to insert new element after\n\
         the given element. Note that prepend inserts\n\
         after the first matching element, append after the last\n\
@@ -64,11 +62,15 @@ Options:  \n\
          the given element. Note that prepend inserts\n\
          before the first matching element, append before the last\n\
          matching element.\n\
-  --separator(-S): The separator between path elements. Default: ':'\n\
-  --preserve-trailing-slash(-P): by default a trailing slash is removed. This changes\n\
-           the behaviour to keep those slashes.\n\
   --allow-empty(-E): Allow empty entries. By default they are removed.\n\
   --colour(-C): colorize output - currently only affects the list command.\n\
+Global options:  \n\
+  --preserve-trailing-slash(-P): by default a trailing slash is removed. This changes\n\
+           the behaviour to keep those slashes.\n\
+  --separator(-S): The separator between path elements. Default: ':'\n\
+  --unique(-U): calls a uniquify at the beginning and at the end, just a shortcut for\n\
+           putting -u twice. This ensures matching at the right place and leaving a\n\
+           uniquified path.\n\
 NOTE:\n\
   The order of options matters! Every option affects only subsequent commands, until\n\
   it is changed again. To remove all option use the --reset-options option.\n\
@@ -89,8 +91,7 @@ You may redistribute copies of Pathplode\n\
 under the terms of the GNU General Public License.\n\
 For more information about these matters, see the file named COPYING.";
 
-static bool uniquify_before = false;
-static bool uniquify_after = false;
+static bool unique_opt = false;
 static bool list_paths_occured = false;
 
 enum pp_cmd {
@@ -106,9 +107,6 @@ enum pp_cmd {
   after_elm,
   colour,
   allow_empty,
-  separator,
-  unique,
-  preserve_trailing_slash,
   reset_options
 };
 
@@ -200,10 +198,10 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         commands.push(cmd_with_arg(after_elm, optarg));
         break;
       case 'E':
+        pplist.set_allow_empty(true);
         break;
       case 'U':
-        uniquify_before = true;
-        uniquify_after = true;
+        unique_opt = true;
         break;
       case 'B':
         commands.push(cmd_with_arg(before_elm, optarg));
@@ -215,10 +213,10 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         commands.push(cmd_with_arg(colour, optarg));
         break;
       case 'P':
-        cout << c << " UNSUPPORTED!" << endl;
+        pplist.set_purge_trailing_slash(false);
         break;
       case 'S':
-        commands.push(cmd_with_arg(separator, optarg));
+        pplist.set_separator(optarg[0]);
         break;
         
       default:
@@ -245,6 +243,8 @@ int main(int argc, char* argv[], char *env[]) {
   process_options(&argc, &argv, command, command_arg, all_paths);
   if (argc>0) path_list_in = argv[argc-1];
   all_paths = path_list_in;
+
+  if (unique_opt) error_occured |= all_paths.uniquify();
 
   while(!commands.empty()) {
     cmd_with_arg &next_command = commands.front();
@@ -281,23 +281,16 @@ int main(int argc, char* argv[], char *env[]) {
       all_paths.clear_hook();
       all_paths.set_colour(false);
       break;
-    case allow_empty:
-      //TODO (?)
-      break;
-    case preserve_trailing_slash:
-      //TODO (?)
-      break;
     case colour:
         all_paths.set_colour(true);
-      break;
-    case separator:
-      pathp_list::set_separator(next_command.arg[0]);
       break;
     default:
       cout << "Error: Illegal or no command!" << endl;
     }
     commands.pop();
   }
+
+  if (unique_opt) error_occured |= all_paths.uniquify();
 
   if (!list_paths_occured) {
     cout << all_paths << endl;

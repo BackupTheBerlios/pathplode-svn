@@ -58,13 +58,15 @@ public:
   int uniquify(void);
   int list_elements(void);
   string to_string(void);
-  static void set_separator(char new_sep) { pathp_list::separator_default=new_sep;}
+  void set_separator(char new_sep) { separator=new_sep;}
   int set_hook(string new_hook_pattern, location_position new_pattern_hook);
   void clear_hook(void) { pattern_hook=none; };
 
   void set_list_from_string(string path_string);
   inline void set_colour(bool new_val) { use_colour = new_val; }
   pathp_list& operator=(const string path_string);
+  void set_purge_trailing_slash(bool new_val) { purge_trailing_slash = new_val; };
+  void set_allow_empty(bool new_val) { allow_empty=new_val; }
   
 private:
 
@@ -86,6 +88,7 @@ private:
   string hook_pattern;
   location_position pattern_hook;
   bool use_colour;
+  bool allow_empty;
   bool ignore_trailing_slash; // in comparisons.. so /bin and /bin/ is the same
   static char separator_default;
   static bool purge_trailing_slash;

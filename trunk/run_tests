@@ -162,6 +162,31 @@ perform_test $RESULTPATH 0 "-B /home/ulf/gnu/bin -l /usr/games -p /first/path"
 export RESULTPATH=/first/path:/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
 perform_test $RESULTPATH 0 "-B /home/ulf/gnu/bin -l /usr/games -r -p /first/path"
 
+export TESTPATH=/usr/games:/bin:/usr/games/:/home/ulf/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+# T24: test unslashify - must remove first /usr/games
+export RESULTPATH=/bin:/usr/games:/home/ulf/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+perform_test $RESULTPATH 0 "-f /usr/games/"
+
+# T25: test unslashify switched off - must remove second /usr/games
+export RESULTPATH=/usr/games:/bin:/home/ulf/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+perform_test $RESULTPATH 0 "-P -f /usr/games/"
+
+export TESTPATH='B4-A22-L43-G1'
+# T26: test alternate separator
+export RESULTPATH='B4-A11-L43-G1'
+perform_test $RESULTPATH 0 "-f A22 -A B4 -p A11 -S -"
+
+export TESTPATH=/usr/games:/bin::/home/ulf/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+# T27: test empty path - must be removed
+export RESULTPATH=/usr/games:/bin:/home/ulf/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11
+perform_test $RESULTPATH 0 "-l /usr/games/"
+
+# T28: test empty path with allow_empty - must not be removed
+export RESULTPATH=/usr/games:/bin::/home/ulf/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11
+perform_test $RESULTPATH 0 "-l /usr/games/ -E"
+
+
+
 if [ "$prog_type" = "c++" ]; then
     TESTPATH=/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
     RESULTPATH=$TESTPATH
