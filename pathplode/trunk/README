@@ -1,0 +1,33 @@
+
+Pathplode is a small utility to efficiently modify the PATH environment variable
+(or similar variables). 
+
+It is especially meant for use in company environments, in which the PATH is
+modified by diverse authorities (system administrator, tool administrators and
+user). Very often tools can be selected by a tool which modifies the PATH
+variable, usually adding more path elements. This will lead to a long PATH with
+several elements contained more than once.
+
+A typical usage to clean up the path might look like:
+
+PATH=`pathplode --uniquify $PATH`
+
+If you want to know which path elements are present more than once:
+
+pathplode --list --colour $PATH
+
+This will show all elements of the PATH with shadowed elements in red:
+
+/home/ulf/gnu/bin
+/home/ulf/bin
+/usr/local/bin
+/usr/bin
+/bin
+/usr/bin/X11
+/usr/games
+/home/ulf/gnu/bin      <= This will be red (and would be removed by uniquify)
+
+
+You can also modify the PATH:
+
+PATH=`pathplode --unique --append ~/gnu/bin $PATH`
