@@ -48,32 +48,38 @@ enum pp_cmd {
   list_paths
 };
 
+#define VERSION "0.1"
+
 #define USAGE "\n\
 Usage: pathplode [options] <command> PATH\n\
 Modify the incoming path as specified by command and options and give it to standard output.\n\
+Information:\n\
+  --help (-h)\n\
+  --version (-v)\n\
 Commands:\n\
-  --append  <element>: put element at end of list\n\
-  --prepend <element>: put element at beginning of list\n\
-  --remove-first <element>: remove the first matching element \n\
-  --remove-all <element>: remove all occurrences of element\n\
-  --uniquify: remove all multiple entries, just leaving the first one \n\
-  --list: List all path entries, each on its own line\n\
+  --append(-a) <element>: put element at end of list\n\
+  --prepend(-p) <element>: put element at beginning of list\n\
+  --remove-first(-f) <element>: remove the first matching element \n\
+  --remove-last(-l) <element>: remove the last matching element \n\
+  --remove-all(-d) <element>: remove all occurrences of element\n\
+  --uniquify(-u): remove all multiple entries, just leaving the first one \n\
+  --list(-t): List all path entries, each on its own line\n\
 Options:  \n\
-  --unique: remove multiple entries. Only the entry with the\n\
+  --unique(-U): remove multiple entries. Only the entry with the\n\
           highest priority is left over.\n\
-  --after <anchor>: modify append/prepend to insert new element after\n\
+  --after(-A) <anchor>: modify append/prepend to insert new element after\n\
         the given element. Note that prepend inserts\n\
         after the first matching element, append after the last\n\
         matching element.\n\
-  --before <anchor>: modify append/prepend to insert new element before\n\
+  --before(-B) <anchor>: modify append/prepend to insert new element before\n\
          the given element. Note that prepend inserts\n\
          before the first matching element, append before the last\n\
          matching element.\n\
-  --separator: The separator between path elements. Default: ':'\n\
-  --preserve-trailing-slash: by default a trailing slash is removed. This changes\n\
+  --separator(-S): The separator between path elements. Default: ':'\n\
+  --preserve-trailing-slash(-P): by default a trailing slash is removed. This changes\n\
            the behaviour to keep those slashes.\n\
-  --allow-empty: Allow empty entries. By default they are removed.\n\
-  --color: colorize output - currently only affects the list command.\n\
+  --allow-empty(-E): Allow empty entries. By default they are removed.\n\
+  --colour(-C): colorize output - currently only affects the list command.\n\
 Examples:\n\
   pathplode --uniquify ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:/usr/local/bin\n\
       -> ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games\n\
@@ -82,10 +88,18 @@ Examples:\n\
   pathplode --append ~/gnu/bin /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games\n\
       -> /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
   pathplode --prepend ~/bin --after ~/gnu/bin /usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
-      -> /usr/bin:/bin:~/gnu/bin:~/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
-";
+      -> /usr/bin:/bin:~/gnu/bin:~/bin:/usr/bin/X11:/usr/games:~/gnu/bin";
 
+#define COPYING "\n\
+Copyright (C) 2004 Ulf Klaperski.\n\
+Pathplode comes with ABSOLUTELY NO WARRANTY.\n\
+You may redistribute copies of Pathplode\n\
+under the terms of the GNU General Public License.\n\
+For more information about these matters, see the file named COPYING.";
+
+string version_string = string("Pathplode, version ") + VERSION;
 const char usage_string[] = USAGE;
+const char copying_string[] = COPYING;
 
 void process_options (int* argc, char** argv[], pp_cmd &command, string &command_arg,
                       pathp_list &pplist) {
@@ -95,6 +109,7 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
   static struct option pathplode_options[] =
   {
     {"help", 0, 0, 'h'},
+    {"version", 0, 0, 'v'},
     {"list", 0, 0, 't'},
     {"uniquify", 0, 0, 'u'},
     {"prepend", 1, 0, 'p'},
@@ -114,14 +129,20 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
 
   while (1)
   {
-    c = getopt_long (*argc, *argv, "htup:a:f:l:d:A:B:CES:UP",
+    c = getopt_long (*argc, *argv, "hvtup:a:f:l:d:A:B:CES:UP",
                      pathplode_options, &option_index);
     if (c<0) break;
 
     switch (c)
     {
       case 'h':
+        cout << version_string << endl;
         cout << usage_string << endl;
+        cout << copying_string << endl;
+        exit(0);
+      case 'v':
+        cout << version_string << endl;
+        cout << copying_string << endl;
         exit(0);
       case 'u':
         command = uniquify;
@@ -213,6 +234,9 @@ int main(int argc, char* argv[], char *env[]) {
     case remove_last:
       all_paths.remove_last(command_arg);
       break;
+    case remove_all:
+      //all_paths.remove_all(command_arg); BUGBUG
+      break;
     default:
       cout << "Error: Illegal or no command!" << endl;
   }
@@ -222,20 +246,5 @@ int main(int argc, char* argv[], char *env[]) {
     cout << all_paths << endl;
   }
   
-
-//     cout << "Aufruf des Programms = "
-//          << argv[0] << endl;
-
-//     cout << (argc-1)
-//          << " weitere Argumente wurden main() übergeben:\n";
-
-//     int i = 1;
-//     while(argv[i])
-//           cout << argv[i++] << endl;
-
-//     cout << "\n*** Umgebungs-Variablen: ***\n";
-//     i = 0;
-//     while(env[i])
-//           cout << env[i++] << endl;
   return 0;
 }

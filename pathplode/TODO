@@ -8,4 +8,5 @@ Hey Emacs, this is -*- outline -*-
 ** concept for error handling
 ** Currently hooks are regexps in perl version and fixed strings in C++ version.
    Maybe using fixed strings is sufficient for the targeted applications.
- 
+** color codes for terminals....
+   what is the right way of specifying them instead of hardcoding them? 
