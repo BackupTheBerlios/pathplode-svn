@@ -1,6 +1,7 @@
 
 # $Id$
 
+#CXXFLAGS=-O3 -fomit-frame-pointer -Wall
 CXXFLAGS=-g -Wall
 
 pathplode: pathplode.o pathp_list.o

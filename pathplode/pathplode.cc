@@ -34,6 +34,9 @@ extern char *optarg;
 #include <getopt.h>
 #include "pathp_list.h"
 
+static bool uniquify_before = false;
+static bool uniquify_after = false;
+
 enum pp_cmd {
   undefined,
   uniquify,
@@ -111,6 +114,8 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
       case 'E':
         break;
       case 'U':
+        uniquify_before = true;
+        uniquify_after = true;
         break;
       case 'B':
         pplist.set_hook(optarg, before);
@@ -146,6 +151,7 @@ int main(int argc, char* argv[], char *env[]) {
   pathp_list all_paths(path_list_in);
   process_options(&argc, &argv, command, command_arg, all_paths);
 
+  if (uniquify_before) all_paths.uniquify();
   switch (command) {
     case uniquify:
       all_paths.uniquify();
@@ -159,9 +165,13 @@ int main(int argc, char* argv[], char *env[]) {
     case prepend:
       all_paths.prepend(command_arg);
       break;
+    case remove_first:
+      all_paths.remove_first(command_arg);
+      break;
     default:
       cout << "Error: Illegal or no command!" << endl;
   }
+  if (uniquify_after) all_paths.uniquify();
 
   if (command != list_path) {
     cout << all_paths << endl;
