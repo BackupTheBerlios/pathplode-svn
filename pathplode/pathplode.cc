@@ -212,39 +212,40 @@ int main(int argc, char* argv[], char *env[]) {
   
   string path_list_in(argv[argc-1]); 
   pathp_list all_paths(path_list_in);
+  int error_occured = 0;
   process_options(&argc, &argv, command, command_arg, all_paths);
 
-  if (uniquify_before) all_paths.uniquify();
+  if (uniquify_before) error_occured |= all_paths.uniquify();
   switch (command) {
     case uniquify:
-      all_paths.uniquify();
+      error_occured |= all_paths.uniquify();
       break;
     case list_paths:
-      all_paths.list_elements();
+      error_occured |= all_paths.list_elements();
       break;
     case append:
-      all_paths.append(command_arg);
+      error_occured |= all_paths.append(command_arg);
       break;
     case prepend:
-      all_paths.prepend(command_arg);
+      error_occured |= all_paths.prepend(command_arg);
       break;
     case remove_first:
-      all_paths.remove_first(command_arg);
+      error_occured |= all_paths.remove_first(command_arg);
       break;
     case remove_last:
-      all_paths.remove_last(command_arg);
+      error_occured |= all_paths.remove_last(command_arg);
       break;
     case remove_all:
-      all_paths.remove_all(command_arg);
+      error_occured |= all_paths.remove_all(command_arg);
       break;
     default:
       cout << "Error: Illegal or no command!" << endl;
   }
-  if (uniquify_after) all_paths.uniquify();
+  if (uniquify_after) error_occured |= all_paths.uniquify();
 
   if (command != list_paths) {
     cout << all_paths << endl;
   }
   
-  return 0;
+  return error_occured;
 }

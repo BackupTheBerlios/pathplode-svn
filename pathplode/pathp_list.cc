@@ -39,18 +39,14 @@ bool pathp_list::purge_trailing_slash = true;
 
 #define REVERSE_ITERATOR_DOES_NOT_WORK
 
-void bail_out (string message) {
-  cerr << message << "!" << endl;
-  exit(1);
-}
-
-void pathp_list::set_hook(string new_hook_pattern, location_position new_pattern_hook) {
+int pathp_list::set_hook(string new_hook_pattern, location_position new_pattern_hook) {
   if (pattern_hook!=none) {
     cerr << "Error: only one before/after regex must be defined!" << endl;
     exit(1);
   }
   hook_pattern = new_hook_pattern;
   pattern_hook = new_pattern_hook;
+  return 0;
 }
 
 
@@ -80,7 +76,7 @@ pathp_list::pathp_list(const pathp_list& src_pplst) {
   paths = src_pplst.paths;
 }
 
-void pathp_list::prepend(string new_elm) {
+int pathp_list::prepend(string new_elm) {
   list<string>::iterator elm;
   bool found = false;
   if (purge_trailing_slash) {
@@ -95,12 +91,16 @@ void pathp_list::prepend(string new_elm) {
       } else elm++;
     }
   } else found=true;
-  if (found==false) bail_out("Anchor not found during append");
+  if (found==false) {
+    cerr << "Anchor not found during prepend" << "!" << endl;
+    return 1;
+  }
   insert_iterator< list<string> > ins_elm(paths, elm);
   *ins_elm = new_elm;
+  return 0;
 }
 
-void pathp_list::append(string new_elm) {
+int pathp_list::append(string new_elm) {
   list<string>::iterator elm;
   bool found = false;
   if (purge_trailing_slash) {
@@ -115,12 +115,16 @@ void pathp_list::append(string new_elm) {
       };
     }
   } else found=true;
-  if (found==false) bail_out("Anchor not found during append");
+  if (found==false) {
+    cerr << "Anchor not found during append" << "!" << endl;
+    return 1;
+  }
   insert_iterator< list<string> > ins_elm(paths, elm);
   *ins_elm = new_elm;
+  return 0;
 }
 
-void pathp_list::remove_first(string elm_to_remove) {
+int pathp_list::remove_first(string elm_to_remove) {
   list<string>::iterator elm;
   list<string>::iterator elm_last = paths.end();
   list<string>::iterator elm_next;
@@ -141,11 +145,17 @@ void pathp_list::remove_first(string elm_to_remove) {
       elm++;
     }
   } 
-  if (found) paths.erase(elm);
+  if (found) {
+    paths.erase(elm);
+    return 0;
+  } else {
+    cerr << "Element to remove not found during remove_first" << "!" << endl;
+    return 1;
+  }
 }
 
 #ifdef REVERSE_ITERATOR_DOES_NOT_WORK
-void pathp_list::remove_last(string elm_to_remove) {
+int pathp_list::remove_last(string elm_to_remove) {
   list<string>::iterator elm, elm_found;
   list<string>::iterator elm_last = paths.end();
   list<string>::iterator elm_next;
@@ -165,7 +175,13 @@ void pathp_list::remove_last(string elm_to_remove) {
     elm_last = elm;
     elm++;
   } 
-  if (elm_found!=paths.end()) paths.erase(elm_found);
+  if (elm_found!=paths.end()) {
+    paths.erase(elm_found);
+    return 0;
+  } else {
+    cerr << "Element to remove not found during remove_last" << "!" << endl;
+    return 1;
+  }
 }
 #else
 void pathp_list::remove_last(string elm_to_remove) {
@@ -197,7 +213,7 @@ void pathp_list::remove_last(string elm_to_remove) {
 }
 #endif
 
-void pathp_list::remove_all(string elm_to_remove) {
+int pathp_list::remove_all(string elm_to_remove) {
   list<string>::iterator elm;
   bool finished = false;
   
@@ -214,9 +230,10 @@ void pathp_list::remove_all(string elm_to_remove) {
     if (found) paths.erase(elm);
     else finished=true;
   }
+  return 0;
 }
 
-void pathp_list::uniquify(void) {
+int pathp_list::uniquify(void) {
   list<string> tmp_lst = this->paths;
   set<string> elms_found;
   this->paths.clear();
@@ -232,10 +249,11 @@ void pathp_list::uniquify(void) {
     }
     elm++;
   } while (elm!=tmp_lst.end());
+  return 0;
 }
 
 
-void pathp_list::list_elements(void) {
+int pathp_list::list_elements(void) {
   list<string>::iterator element = paths.begin();
   set<string> elms_found;
   bool elm_repeated;
@@ -245,6 +263,7 @@ void pathp_list::list_elements(void) {
     elms_found.insert(*element);
     element++;
   } while (element!=paths.end());
+  return 0;
 }
 
 string pathp_list::to_string(void) {

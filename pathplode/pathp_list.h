@@ -41,7 +41,6 @@ enum location_position {
   after
 };
 
-void bail_out (string message);
 
 class pathp_list {
 public:
@@ -51,16 +50,16 @@ public:
   // copy constructor
   pathp_list(const pathp_list& src_pplst);
 
-  void prepend(string new_elm);
-  void append(string new_elm);
-  void remove_first(string elm_to_remove);
-  void remove_last(string elm_to_remove);
-  void remove_all(string elm_to_remove);
-  void uniquify(void);
-  void list_elements(void);
+  int prepend(string new_elm);
+  int append(string new_elm);
+  int remove_first(string elm_to_remove);
+  int remove_last(string elm_to_remove);
+  int remove_all(string elm_to_remove);
+  int uniquify(void);
+  int list_elements(void);
   string to_string(void);
   static void set_separator(char new_sep) { pathp_list::separator_default=new_sep;}
-  void set_hook(string new_hook_pattern, location_position new_pattern_hook);
+  int set_hook(string new_hook_pattern, location_position new_pattern_hook);
 
   inline void set_colour(bool new_val) { use_colour = new_val; }
   
