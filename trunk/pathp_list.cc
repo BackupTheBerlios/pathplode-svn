@@ -52,10 +52,6 @@ bool pathp_list::match_regex(string candidate, string pattern) {
 #define REVERSE_ITERATOR_DOES_NOT_WORK
 
 int pathp_list::set_hook(string new_hook_pattern, location_position new_pattern_hook) {
-  if (pattern_hook!=none) {
-    cerr << "Error: only one before/after regex must be defined!" << endl;
-    exit(1);
-  }
   hook_pattern = new_hook_pattern;
   pattern_hook = new_pattern_hook;
   return 0;
@@ -91,9 +87,16 @@ pathp_list::pathp_list(string path_string) {
   ignore_trailing_slash = false; 
 }
 
+// copy constructor
 pathp_list::pathp_list(const pathp_list& src_pplst) {
   separator = src_pplst.separator;
   paths = src_pplst.paths;
+  allow_empty = src_pplst.allow_empty;
+  use_colour = src_pplst.use_colour;
+  use_regex = src_pplst.use_regex;
+  ignore_trailing_slash = src_pplst.ignore_trailing_slash;
+  pattern_hook = src_pplst.pattern_hook;
+  hook_pattern = src_pplst.hook_pattern;
 }
 
 int pathp_list::prepend(string new_elm) {
@@ -105,7 +108,7 @@ int pathp_list::prepend(string new_elm) {
   elm = paths.begin();
   if (pattern_hook != none) {
     while (elm != paths.end() && !found) { 
-      if (*elm == this->hook_pattern) { 
+      if (match_elm(*elm, this->hook_pattern)) { 
         found = true;
         if (pattern_hook==after) elm++;
       } else elm++;
@@ -129,7 +132,7 @@ int pathp_list::append(string new_elm) {
   elm = paths.end();
   if (pattern_hook != none) {
     while (!found && --elm != paths.begin()) {
-      if (this->hook_pattern == *elm) { 
+      if (match_elm(*elm, this->hook_pattern)) { 
         found = true;
         if (pattern_hook==after) elm++;
       };
@@ -155,10 +158,10 @@ int pathp_list::remove_first(string elm_to_remove) {
   elm = paths.begin();
   while (elm != paths.end() && !found) {
     elm_next=elm; elm_next++;
-    if ((*elm == elm_to_remove) &&
+    if (match_elm(*elm, elm_to_remove) &&
         (pattern_hook == none
-         || (pattern_hook==after && elm_last!=paths.end() && *elm_last==hook_pattern)
-         || (pattern_hook==before && (elm_next)!= paths.end() && *elm_next==hook_pattern))) {
+         || (pattern_hook==after && elm_last!=paths.end() && match_elm(*elm_last, hook_pattern))
+         || (pattern_hook==before && (elm_next)!= paths.end() && match_elm(*elm_next, hook_pattern)))) {
       found = true;
     } else {
       elm_last = elm;
@@ -186,10 +189,10 @@ int pathp_list::remove_last(string elm_to_remove) {
   elm = paths.begin();
   while (elm != paths.end()) {
     elm_next=elm; elm_next++;
-    if ((*elm == elm_to_remove) &&
+    if (match_elm(*elm, elm_to_remove) &&
         (pattern_hook == none
-         || (pattern_hook==after && elm_last!=paths.end() && *elm_last==hook_pattern)
-         || (pattern_hook==before && (elm_next)!= paths.end() && *elm_next==hook_pattern))) {
+         || (pattern_hook==after && elm_last!=paths.end() && match_elm(*elm_last, hook_pattern))
+         || (pattern_hook==before && (elm_next)!= paths.end() && match_elm(*elm_next, hook_pattern)))) {
       elm_found = elm;
     } 
     elm_last = elm;
@@ -217,10 +220,10 @@ void pathp_list::remove_last(string elm_to_remove) {
   while (elm_r != paths.rend() && !found) {
     elm_next=elm_r; elm_next++;
     cout << *elm_r << endl;
-     if ((*elm_r == elm_to_remove) &&
+    if (match_elm(*elm_r, elm_to_remove) &&
         (pattern_hook == none
-         || (pattern_hook==after && elm_next!=paths.rend() && *elm_next==hook_pattern)
-         || (pattern_hook==before && (elm_last)!= paths.rbegin() && *elm_last==hook_pattern))) {
+         || (pattern_hook==after && elm_next!=paths.rend() && match_elm(*elm_next, hook_pattern))
+         || (pattern_hook==before && (elm_last)!= paths.rbegin() && match_elm(*elm_last, hook_pattern)))) {
       found = true;
     } else {
       elm_last = elm_r;

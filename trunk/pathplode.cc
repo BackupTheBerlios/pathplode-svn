@@ -36,7 +36,7 @@ extern char *optarg;
 #include "pathp_list.h"
 
 
-#define VERSION "0.5"
+#define VERSION "0.6"
 
 #define USAGE "\n\
 Usage: pathplode [options] <command> [options] <command> ... PATH\n\
@@ -64,6 +64,8 @@ Local options:  \n\
          matching element.\n\
   --allow-empty(-E): Allow empty entries. By default they are removed.\n\
   --colour(-C): colorize output - currently only affects the list command.\n\
+  --regex(-R): Use regular expressions. All hooks and elements to remove are treated\n\
+         as regular expressions (GNU regex syntax).\n\
 Global options:  \n\
   --preserve-trailing-slash(-P): by default a trailing slash is removed. This changes\n\
            the behaviour to keep those slashes.\n\
@@ -82,7 +84,10 @@ Examples:\n\
   pathplode --append ~/gnu/bin /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games\n\
       -> /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
   pathplode --after ~/gnu/bin --prepend ~/bin /usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
-      -> /usr/bin:/bin:~/gnu/bin:~/bin:/usr/bin/X11:/usr/games:~/gnu/bin";
+      -> /usr/bin:/bin:~/gnu/bin:~/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
+  pathplode --regex --after 'X1[12]' --prepend ~/new /usr/bin:/bin:/usr/bin/X12:~/gnu/bin:/usr/bin/X11:/usr/games\n\
+      -> /usr/bin:/bin:/usr/bin/X12:~/new:~/gnu/bin:/usr/bin/X11:/usr/games\n";
+
 
 #define COPYING "\n\
 Copyright (C) 2004, 2005 Ulf Klaperski.\n\
@@ -106,7 +111,8 @@ enum pp_cmd {
   before_elm,
   after_elm,
   colour,
-  reset_options
+  reset_options,
+  use_regex
 };
 
 string version_string = string("Pathplode, version ") + VERSION;
@@ -150,12 +156,13 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
     {"separator", 1, 0, 'S'},
     {"unique", 0, 0, 'U'},
     {"preserve-trailing-slash", 0, 0, 'P'},
+    {"regex", 0, 0, 'R'},
     {0, 0, 0, 0}
   };
 
   while (1)
   {
-    c = getopt_long (*argc, *argv, "hvtup:a:f:l:d:A:B:CrES:UP",
+    c = getopt_long (*argc, *argv, "hvtup:a:f:l:d:A:B:CrRES:UP",
                      pathplode_options, &option_index);
     if (c<0) break;
 
@@ -204,6 +211,9 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         break;
       case 'B':
         commands.push(cmd_with_arg(before_elm, optarg));
+        break;
+      case 'R':
+        commands.push(cmd_with_arg(use_regex, ""));
         break;
       case 'r':
         commands.push(cmd_with_arg(reset_options, ""));
@@ -276,9 +286,13 @@ int main(int argc, char* argv[], char *env[]) {
     case after_elm:
       all_paths.set_hook(next_command.arg, after);
       break;
+    case use_regex:
+      all_paths.set_use_regex(true);
+      break;
     case reset_options:
       all_paths.clear_hook();
       all_paths.set_colour(false);
+      all_paths.set_use_regex(false);
       break;
     case colour:
         all_paths.set_colour(true);

@@ -185,6 +185,34 @@ perform_test $RESULTPATH 0 "-l /usr/games/"
 export RESULTPATH=/usr/games:/bin::/home/ulf/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11
 perform_test $RESULTPATH 0 "-l /usr/games/ -E"
 
+export TESTPATH='A17:B4:A22:L43:G1:A27'
+# T29: test after-hook with regex
+export RESULTPATH=A17:B4:A22:NEW:L43:G1:A27
+perform_test $RESULTPATH 0 "-R -A A[23] -p NEW "
+
+# T30: test before-hook with regex
+export RESULTPATH=A17:B4:NEW:A22:L43:G1:A27
+perform_test $RESULTPATH 0 "-R -B A[23] -p NEW "
+
+# T31: test remove-first with regex
+export RESULTPATH=A17:B4:L43:G1:A27
+perform_test $RESULTPATH 0 "-R -f A[23] "
+
+# T32: test remove-all with regex
+export RESULTPATH=A17:B4:L43:G1
+perform_test $RESULTPATH 0 "-R -d A[23] "
+
+# T33: test remove-last with regex
+export RESULTPATH=A17:B4:A22:L43:G1
+perform_test $RESULTPATH 0 "-R -l A[23] "
+
+# T34: test remove-first/after with regex
+export RESULTPATH=A17:B4:A22:L43:G1
+perform_test $RESULTPATH 0 "-R -A G -f A[23] "
+
+# T35: test remove-last/after + append/after with regex
+export RESULTPATH=A17:B4:L43:NEW:G1:A27
+perform_test $RESULTPATH 0 "-R -B L -l A[23] -A 4 -a NEW "
 
 
 if [ "$prog_type" = "c++" ]; then

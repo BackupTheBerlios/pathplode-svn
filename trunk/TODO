@@ -2,15 +2,11 @@ Hey Emacs, this is -*- outline -*-
 
 * Just now...
 
+** nothing :-)
 
 * Enhancements & Open Concept Questions 
 ** concept for error handling
    OK, for now this is done with return values. 
-** Currently hooks are regexps in perl version and fixed strings in C++ version.
-   Actually the perl version is quite unsupported now...
-   But the C++ version should support regexps. This would ease switching tool versions,
-   e.g. replacing /opt/tool-3.5/bin with /opt/tool-3.7/bin without knowing which version
-   of the tool is selected. 
 ** color codes for terminals....
    what is the right way of specifying them instead of hardcoding them? 
 
@@ -22,6 +18,11 @@ Hey Emacs, this is -*- outline -*-
    Is it tolerable to have this solved by calling pathplode several times?
    At least this strongly points to use only the C++ version, as this should have
    a much shorter load time.  
+** Currently hooks are regexps in perl version and fixed strings in C++ version.
+   Actually the perl version is quite unsupported now...
+   But the C++ version should support regexps. This would ease switching tool versions,
+   e.g. replacing /opt/tool-3.5/bin with /opt/tool-3.7/bin without knowing which version
+   of the tool is selected. DONE - regexps in c++ supported now!
 
 
 ** Fix slash removal - OK, it's a global option now
