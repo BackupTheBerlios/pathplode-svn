@@ -13,8 +13,11 @@ class pathp_list {
 public:
   pathp_list(string path_string);
   void list_elements(void);
+  static void set_separator(char new_sep) { pathp_list::separator_default=new_sep;}
 private:
   list<string> paths;
+  char separator;
+  static char separator_default;
 };
 
 
