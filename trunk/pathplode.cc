@@ -36,7 +36,7 @@ extern char *optarg;
 #include "pathp_list.h"
 
 
-#define VERSION "0.6"
+#define VERSION "0.7"
 
 #define USAGE "\n\
 Usage: pathplode [options] <command> [options] <command> ... PATH\n\
@@ -198,7 +198,7 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         commands.push(cmd_with_arg(remove_all, optarg));
         break;
       case 't':
-        commands.push(cmd_with_arg(list_paths, optarg));
+        commands.push(cmd_with_arg(list_paths, ""));
         break;
       case 'A':
         commands.push(cmd_with_arg(after_elm, optarg));
@@ -219,7 +219,7 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         commands.push(cmd_with_arg(reset_options, ""));
         break;
       case 'C':
-        commands.push(cmd_with_arg(colour, optarg));
+        commands.push(cmd_with_arg(colour, ""));
         break;
       case 'P':
         pplist.set_purge_trailing_slash(false);

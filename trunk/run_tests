@@ -11,13 +11,13 @@ prog_type=$1
 
 if [ "$prog_type" = "c++" ]; then
     binary=./pathplode
-    has_regex=1
+    has_regex=0
 elif [ "$prog_type" = "perl" ]; then
     binary=./pathplode.pl
-    has_regex=0
+    has_regex=1
 else
-    echo "Must give 'c++' or 'perl' as argument!"
-    exit 1
+    binary=./pathplode
+    has_regex=0    
 fi
 
 tests=0
@@ -61,37 +61,38 @@ echo $TESTPATH
 RESULTPATH="/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/usr/bin/X11"
 perform_test $RESULTPATH 0 "--uniquify"
 # T1: insert /opt/bin after the first and only entry that contains "gnu" (prepend/after)
-if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+if [ $has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+echo $hook
 RESULTPATH="/bin:/usr/games:/home/ulf/gnu/bin:/opt/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
 perform_test $RESULTPATH 0 "--after $hook --prepend /opt/bin"
 
 # T2: insert /opt/bin before the first and only entry that contains "gnu" (prepend/before)
-if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+if [ $has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
 perform_test $RESULTPATH 0 "--before $hook --prepend /opt/bin"
 
 # T3: T2 with short options
-if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+if [ $has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
 perform_test $RESULTPATH 0 "-B $hook -p /opt/bin"
 
 # T4: insert /opt/bin before the first and only entry that contains "gnu" with mixed options -> T2
-if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+if [ $has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
 perform_test $RESULTPATH 0 "--before $hook -p /opt/bin"
 
 # T5: insert /opt/bin before the last and only entry that contains "gnu" with short options (append/before)
-if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+if [ $has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
 perform_test $RESULTPATH 0 "-B $hook -a /opt/bin"
 
 # T6: insert /opt/bin after the last entry that contains "bin" with short options (append/after)
-if [ has_regex = 1 ]; then hook="bin"; else hook="/usr/bin/X11"; fi
+if [ $has_regex = 1 ]; then hook="bin"; else hook="/usr/bin/X11"; fi
 RESULTPATH="/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/opt/bin:/usr/games"
 perform_test $RESULTPATH 0 "-A $hook -a /opt/bin"
 
 # T7: insert UPPERCASE_PATH after last entry that contains "local/"
-if [ has_regex = 1 ]; then hook="local/"; else hook="/usr/local/bin"; fi
+if [ $has_regex = 1 ]; then hook="local/"; else hook="/usr/local/bin"; fi
 RESULTPATH="/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:UPPERCASE_PATH:/usr/bin:/usr/bin/X11"
 perform_test $RESULTPATH 0 " -A $hook -a UPPERCASE_PATH -u"
 

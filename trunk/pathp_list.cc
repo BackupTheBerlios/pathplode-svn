@@ -281,8 +281,8 @@ int pathp_list::list_elements(void) {
   set<string> elms_found;
   bool elm_repeated;
   do {
-    elm_repeated = (elms_found.find(*element)!=elms_found.end()) && use_colour;
-    cout << (elm_repeated?"\e[1;31m":"") << *element << (elm_repeated?"\e[0m":"") << endl;
+    elm_repeated = (elms_found.find(*element)!=elms_found.end());
+    cout << ((elm_repeated&&use_colour)?"\e[1;31m":"") << *element << (elm_repeated?(use_colour?"\e[0m":" <== DUPLICATE"):"") << endl;
     elms_found.insert(*element);
     element++;
   } while (element!=paths.end());

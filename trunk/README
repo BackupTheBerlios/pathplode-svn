@@ -1,5 +1,5 @@
 
-This is release 0.6 of pathplode. Please note that pathplode is alpha software
+This is release 0.7 of pathplode. Please note that pathplode is alpha software
 and might change. Even though the tool is very small it is very likely there are
 still some bugs lurking!
 
@@ -63,6 +63,10 @@ Allow multiple commands in one pathplode call. This includes the following chang
 0.6:
  - fixed a bug: assignment operator removed
  - regular expressions are supported now with the -R option
+
+0.7:
+ - fixed segmentation fault with --list/--colour
+ - fixed (unused) feature in testsuite
 
 ******************** LICENSE
 
