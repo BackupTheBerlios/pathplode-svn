@@ -1,0 +1,80 @@
+
+This is release 0.6 of pathplode. Please note that pathplode is alpha software
+and might change. Even though the tool is very small it is very likely there are
+still some bugs lurking!
+
+Feedback to the author is welcome!
+
+******************** AUTHOR
+
+Ulf Klaperski   <ro_kenn at users.berlios.de>
+
+******************** DESCRIPTION
+
+Pathplode is a small utility to efficiently modify the PATH environment variable
+(or similar variables). 
+
+It is especially meant for use in company environments, in which the PATH is
+modified by diverse authorities (system administrator, tool administrators and
+user). Very often tools can be selected by a tool which modifies the PATH
+variable, usually adding more path elements. This will lead to a long PATH with
+several elements contained more than once.
+
+To get the documentation: Just type 'pathplode --help'!
+
+A typical usage to clean up the path might look like:
+
+PATH=`pathplode --uniquify $PATH`
+
+If you want to know which path elements are present more than once:
+
+pathplode --list --colour $PATH
+
+This will show all elements of the PATH with shadowed elements in red:
+
+/home/ulf/gnu/bin
+/home/ulf/bin
+/usr/local/bin
+/usr/bin
+/bin
+/usr/bin/X11
+/usr/games
+/home/ulf/gnu/bin      <= This will be red (and would be removed by uniquify)
+
+
+You can also modify the PATH:
+
+PATH=`pathplode --unique --append ~/gnu/bin $PATH`
+
+
+******************** CHANGES
+
+0.3:
+
+First Release
+
+0.5:
+
+Allow multiple commands in one pathplode call. This includes the following changes:
+ - The --unique option is obsolete.
+ - Order matters! Options must now be given before the command. They stay in effect
+   until removed by the --reset-options (-r) option.
+
+0.6:
+ - fixed a bug: assignment operator removed
+ - regular expressions are supported now with the -R option
+
+******************** LICENSE
+
+Pathplode is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+Pathplode is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the pathplode sources; see the file COPYING.  
