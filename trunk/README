@@ -1,4 +1,13 @@
 
+This is release 0.3 of pathplode. Please note that pathplode is alpha software
+and will change. This is only a pre-release. Feedback to the author is welcome!
+
+******************** AUTHOR
+
+Ulf Klaperski   <ro_kenn at users.berlios.de>
+
+******************** DESCRIPTION
+
 Pathplode is a small utility to efficiently modify the PATH environment variable
 (or similar variables). 
 
@@ -31,3 +40,26 @@ This will show all elements of the PATH with shadowed elements in red:
 You can also modify the PATH:
 
 PATH=`pathplode --unique --append ~/gnu/bin $PATH`
+
+******************** ROADMAP
+
+In the next releases the following changes are planned:
+
+- support for regular expressions, like '--remove-first "/opt/vendor/release[0-9.]+/bin"'
+
+- support for multiple commands with one program run
+
+******************** LICENSE
+
+Pathplode is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+Pathplode is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the pathplode sources; see the file COPYING.  
