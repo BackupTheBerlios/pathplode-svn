@@ -8,8 +8,10 @@ Hey Emacs, this is -*- outline -*-
 ** concept for error handling
    OK, for now this is done with return  values. 
 ** Currently hooks are regexps in perl version and fixed strings in C++ version.
-   Maybe using fixed strings is sufficient for the targeted applications.
    Actually the perl version is quite unsupported now...
+   But the C++ version should support regexps. This would ease switching tool versions,
+   e.g. replacing /opt/tool-3.5/bin with /opt/tool-3.7/bin without knowing which version
+   of the tool is selected. 
 ** color codes for terminals....
    what is the right way of specifying them instead of hardcoding them? 
 ** concept confusion: --unique too thorough

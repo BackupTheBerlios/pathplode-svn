@@ -12,3 +12,7 @@ To install it:
 - type "make"
 - copy binary pathplode to your PATH (e.g. /usr/local/bin)
 
+For help:
+
+pathplode --help
+
