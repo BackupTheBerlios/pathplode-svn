@@ -3,7 +3,7 @@
  *
  * C++ implementation of pathplode
  *
- * Copyright 2003 by Ulf Klaperski
+ * Copyright 2004 by Ulf Klaperski
  *
  * This file is part of pathplode.
  * 
@@ -45,9 +45,47 @@ enum pp_cmd {
   remove_all,
   append,
   prepend,
-  list_path
+  list_paths
 };
 
+#define USAGE "\n\
+Usage: pathplode [options] <command> PATH\n\
+Modify the incoming path as specified by command and options and give it to standard output.\n\
+Commands:\n\
+  --append  <element>: put element at end of list\n\
+  --prepend <element>: put element at beginning of list\n\
+  --remove-first <element>: remove the first matching element \n\
+  --remove-all <element>: remove all occurrences of element\n\
+  --uniquify: remove all multiple entries, just leaving the first one \n\
+  --list: List all path entries, each on its own line\n\
+Options:  \n\
+  --unique: remove multiple entries. Only the entry with the\n\
+          highest priority is left over.\n\
+  --after <anchor>: modify append/prepend to insert new element after\n\
+        the given element. Note that prepend inserts\n\
+        after the first matching element, append after the last\n\
+        matching element.\n\
+  --before <anchor>: modify append/prepend to insert new element before\n\
+         the given element. Note that prepend inserts\n\
+         before the first matching element, append before the last\n\
+         matching element.\n\
+  --separator: The separator between path elements. Default: ':'\n\
+  --preserve-trailing-slash: by default a trailing slash is removed. This changes\n\
+           the behaviour to keep those slashes.\n\
+  --allow-empty: Allow empty entries. By default they are removed.\n\
+  --color: colorize output - currently only affects the list command.\n\
+Examples:\n\
+  pathplode --uniquify ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:/usr/local/bin\n\
+      -> ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games\n\
+  pathplode --unique --prepend ~/gnu/bin /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games\n\
+      -> ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games\n\
+  pathplode --append ~/gnu/bin /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games\n\
+      -> /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
+  pathplode --prepend ~/bin --after ~/gnu/bin /usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
+      -> /usr/bin:/bin:~/gnu/bin:~/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
+";
+
+const char usage_string[] = USAGE;
 
 void process_options (int* argc, char** argv[], pp_cmd &command, string &command_arg,
                       pathp_list &pplist) {
@@ -66,7 +104,7 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
     {"remove-all", 1, 0, 'd'},
     {"after", 1, 0, 'A'},
     {"before", 1, 0, 'B'},
-    {"color", 0, 0, 'C'},
+    {"colour", 0, 0, 'C'},
     {"allow-empty", 0, 0, 'E'},
     {"separator", 1, 0, 'S'},
     {"unique", 0, 0, 'U'},
@@ -83,8 +121,8 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
     switch (c)
     {
       case 'h':
-        cout << "HELP!" << endl;
-        break;
+        cout << usage_string << endl;
+        exit(0);
       case 'u':
         command = uniquify;
         break;
@@ -108,6 +146,9 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         command = remove_all;
         command_arg = optarg;
         break;
+      case 't':
+        command = list_paths;
+        break;
       case 'A':
         pplist.set_hook(optarg, after);
         break;
@@ -121,6 +162,7 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         pplist.set_hook(optarg, before);
         break;
       case 'C':
+        pplist.set_colour(true);
         break;
       case 'P':
         cout << c << " UNSUPPORTED!" << endl;
@@ -156,7 +198,7 @@ int main(int argc, char* argv[], char *env[]) {
     case uniquify:
       all_paths.uniquify();
       break;
-    case list_path:
+    case list_paths:
       all_paths.list_elements();
       break;
     case append:
@@ -168,12 +210,15 @@ int main(int argc, char* argv[], char *env[]) {
     case remove_first:
       all_paths.remove_first(command_arg);
       break;
+    case remove_last:
+      all_paths.remove_last(command_arg);
+      break;
     default:
       cout << "Error: Illegal or no command!" << endl;
   }
   if (uniquify_after) all_paths.uniquify();
 
-  if (command != list_path) {
+  if (command != list_paths) {
     cout << all_paths << endl;
   }
   

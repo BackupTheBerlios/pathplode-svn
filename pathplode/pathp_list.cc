@@ -12,7 +12,7 @@ using namespace std;
 char pathp_list::separator_default = ':';
 bool pathp_list::purge_trailing_slash = true;
 
-
+#define REVERSE_ITERATOR_DOES_NOT_WORK
 
 void pathp_list::set_hook(string new_hook_pattern, location_position new_pattern_hook) {
   if (pattern_hook!=none) {
@@ -38,6 +38,7 @@ pathp_list::pathp_list(string path_string) {
     paths.push_back(path_element);
     path_string.erase(0, sep_pos+1);
     pattern_hook = none;
+    use_colour = false;
     // this is set to false for speed... if we have purge_trailing_slash (default)
     // it is useless anyway
     ignore_trailing_slash = false; 
@@ -58,7 +59,7 @@ void pathp_list::prepend(string new_elm) {
   elm = paths.begin();
   if (pattern_hook != none) {
     while (elm != paths.end() && !found) { 
-      if (*elm == this->hook_pattern) { // TODO: should be a regexp match
+      if (*elm == this->hook_pattern) { 
         found = true;
         if (pattern_hook==after) elm++;
       } else elm++;
@@ -84,6 +85,7 @@ void pathp_list::append(string new_elm) {
       } else elm--;
     }
   } else found=true;
+  if (found==false) exit(1); // TODO: add better error handling
   insert_iterator< list<string> > ins_elm(paths, elm);
   *ins_elm = new_elm;
 }
@@ -112,6 +114,59 @@ void pathp_list::remove_first(string elm_to_remove) {
   if (found) paths.erase(elm);
 }
 
+#ifdef REVERSE_ITERATOR_DOES_NOT_WORK
+void pathp_list::remove_last(string elm_to_remove) {
+  list<string>::iterator elm, elm_found;
+  list<string>::iterator elm_last = paths.end();
+  list<string>::iterator elm_next;
+  elm_found = paths.end();
+  if (purge_trailing_slash) {
+    path_unslash_r(elm_to_remove);
+  }
+  elm = paths.begin();
+  while (elm != paths.end()) {
+    elm_next=elm; elm_next++;
+    if ((*elm == elm_to_remove) &&
+        (pattern_hook == none
+         || (pattern_hook==after && elm_last!=paths.end() && *elm_last==hook_pattern)
+         || (pattern_hook==before && (elm_next)!= paths.end() && *elm_next==hook_pattern))) {
+      elm_found = elm;
+    } 
+    elm_last = elm;
+    elm++;
+  } 
+  if (elm_found!=paths.end()) paths.erase(elm_found);
+}
+#else
+void pathp_list::remove_last(string elm_to_remove) {
+  list<string>::iterator elm;
+  list<string>::reverse_iterator elm_last = paths.rend();
+  list<string>::reverse_iterator elm_next;
+  reverse_iterator<list<string>::iterator> elm_r(elm);
+  bool found = false;
+  if (purge_trailing_slash) {
+    path_unslash_r(elm_to_remove);
+  }
+  elm_r = paths.rbegin();
+  while (elm_r != paths.rend() && !found) {
+    elm_next=elm_r; elm_next++;
+    cout << *elm_r << endl;
+     if ((*elm_r == elm_to_remove) &&
+        (pattern_hook == none
+         || (pattern_hook==after && elm_next!=paths.rend() && *elm_next==hook_pattern)
+         || (pattern_hook==before && (elm_last)!= paths.rbegin() && *elm_last==hook_pattern))) {
+      found = true;
+    } else {
+      elm_last = elm_r;
+      elm_r++;
+    }
+  }
+  //elm = static_cast<list<string>::iterator>(elm_r);
+  cout << *elm_r << ":" << *elm_r.base()<< endl;
+  if (found) paths.erase(elm);
+}
+#endif
+
 void pathp_list::uniquify(void) {
   list<string> tmp_lst = this->paths;
   set<string> elms_found;
@@ -133,8 +188,12 @@ void pathp_list::uniquify(void) {
 
 void pathp_list::list_elements(void) {
   list<string>::iterator element = paths.begin();
+  set<string> elms_found;
+  bool elm_repeated;
   do {
-    cout << *element << endl;
+    elm_repeated = (elms_found.find(*element)!=elms_found.end()) && use_colour;
+    cout << (elm_repeated?"\e[1;31m":"") << *element << (elm_repeated?"\e[0m":"") << endl;
+    elms_found.insert(*element);
     element++;
   } while (element!=paths.end());
 }

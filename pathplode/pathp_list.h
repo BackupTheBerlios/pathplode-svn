@@ -29,12 +29,15 @@ public:
   void prepend(string new_elm);
   void append(string new_elm);
   void remove_first(string elm_to_remove);
+  void remove_last(string elm_to_remove);
   void uniquify(void);
   void list_elements(void);
   string to_string(void);
   static void set_separator(char new_sep) { pathp_list::separator_default=new_sep;}
   void set_hook(string new_hook_pattern, location_position new_pattern_hook);
 
+  inline void set_colour(bool new_val) { use_colour = new_val; }
+  
 private:
 
   
@@ -54,6 +57,7 @@ private:
   char separator;
   string hook_pattern;
   location_position pattern_hook;
+  bool use_colour;
   bool ignore_trailing_slash; // in comparisons.. so /bin and /bin/ is the same
   static char separator_default;
   static bool purge_trailing_slash;
