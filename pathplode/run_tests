@@ -1,0 +1,65 @@
+#! /bin/bash
+#
+# test suite for pathplode
+#
+# $Id: $
+
+tests=0
+tests_ok=0
+tests_failed=0
+
+perform_test () {
+    expect=$1
+    shift
+    result=`./pathplode.pl $@ $TESTPATH`;
+    status=$?
+    if [ $status -ne 0 ]; then
+	echo "Warning: NON-ZERO exit status"
+    fi
+
+    echo "================================================================================"
+    echo "Testpath: $TESTPATH"
+    echo "Command:  $@"
+    echo "Result:   $result"
+
+    let "tests += 1"
+    if [ "$result" = "$expect" ]; then
+	echo "OK!"
+	let "tests_ok += 1"
+    else 
+	echo "FAIL: expected $expect"
+	let "tests_failed += 1"
+    fi
+}
+
+
+export TESTPATH=/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+echo $TESTPATH
+
+# T0: uniquify command
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/usr/bin/X11" "--uniquify"
+# T1: insert /opt/bin after the first and only entry that contains "gnu"
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/opt/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "--prepend /opt/bin --after gnu"
+# T2: insert /opt/bin before the first and only entry that contains "gnu"
+perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "--prepend /opt/bin --before gnu"
+# T3: T2 with short options, wrong call (-p must be lower case), no change!
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-P /opt/bin -B gnu"
+# T4: insert /opt/bin before the first and only entry that contains "gnu" with mixed options -> T2
+perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-p /opt/bin --before gnu"
+# T5: insert /opt/bin before the last and only entry that contains "gnu" with short options
+perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-a /opt/bin -B gnu"
+# T6: insert /opt/bin after the last entry that contains "bin" with short options
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/opt/bin:/usr/games" "-a /opt/bin -A bin"
+# T7: insert UPPERCASE_PATH after last entry that contains "local/"
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:UPPERCASE_PATH:/usr/bin:/usr/bin/X11" "-a UPPERCASE_PATH -A local/ -U"
+# T8: insert /opt/gcc/bin at the beginning
+perform_test "/opt/gcc/bin:/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-p /opt/gcc/bin"
+# T9: insert /usr/X11R6/bin at the end
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games:/usr/X11R6/bin" "-a /usr/X11R6/bin"
+export TESTPATH=/bin:/usr/games/:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+# T10: prepend /home/ulf/Linux/bin/ uniquely
+perform_test "/home/ulf/Linux/bin:/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/usr/bin/X11" "-p /home/ulf/Linux/bin/ -U"
+
+
+echo "================================================================================"
+echo "Summary: $tests tests, $tests_ok passed, $tests_failed failed"
