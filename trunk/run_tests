@@ -63,37 +63,37 @@ perform_test $RESULTPATH 0 "--uniquify"
 # T1: insert /opt/bin after the first and only entry that contains "gnu" (prepend/after)
 if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/home/ulf/gnu/bin:/opt/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
-perform_test $RESULTPATH 0 "--prepend /opt/bin --after $hook"
+perform_test $RESULTPATH 0 "--after $hook --prepend /opt/bin"
 
 # T2: insert /opt/bin before the first and only entry that contains "gnu" (prepend/before)
 if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
-perform_test $RESULTPATH 0 "--prepend /opt/bin --before $hook"
+perform_test $RESULTPATH 0 "--before $hook --prepend /opt/bin"
 
 # T3: T2 with short options
 if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
-perform_test $RESULTPATH 0 "-p /opt/bin -B $hook"
+perform_test $RESULTPATH 0 "-B $hook -p /opt/bin"
 
 # T4: insert /opt/bin before the first and only entry that contains "gnu" with mixed options -> T2
 if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
-perform_test $RESULTPATH 0 "-p /opt/bin --before $hook"
+perform_test $RESULTPATH 0 "--before $hook -p /opt/bin"
 
 # T5: insert /opt/bin before the last and only entry that contains "gnu" with short options (append/before)
 if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
 RESULTPATH="/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
-perform_test $RESULTPATH 0 "-a /opt/bin -B $hook"
+perform_test $RESULTPATH 0 "-B $hook -a /opt/bin"
 
 # T6: insert /opt/bin after the last entry that contains "bin" with short options (append/after)
 if [ has_regex = 1 ]; then hook="bin"; else hook="/usr/bin/X11"; fi
 RESULTPATH="/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/opt/bin:/usr/games"
-perform_test $RESULTPATH 0 "-a /opt/bin -A $hook"
+perform_test $RESULTPATH 0 "-A $hook -a /opt/bin"
 
 # T7: insert UPPERCASE_PATH after last entry that contains "local/"
 if [ has_regex = 1 ]; then hook="local/"; else hook="/usr/local/bin"; fi
 RESULTPATH="/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:UPPERCASE_PATH:/usr/bin:/usr/bin/X11"
-perform_test $RESULTPATH 0 "-a UPPERCASE_PATH -A $hook -U"
+perform_test $RESULTPATH 0 " -A $hook -a UPPERCASE_PATH -u"
 
 # T8: insert /opt/gcc/bin at the beginning (prepend/begin)
 RESULTPATH="/opt/gcc/bin:/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
@@ -107,13 +107,13 @@ perform_test $RESULTPATH 0 "-a /usr/X11R6/bin"
 # note: /usr/games is present with and without a trailing slash
 export TESTPATH=/bin:/usr/games/:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
 export RESULTPATH="/home/ulf/Linux/bin:/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/usr/bin/X11"
-perform_test $RESULTPATH 0 "-p /home/ulf/Linux/bin/ -U"
+perform_test $RESULTPATH 0 "-p /home/ulf/Linux/bin/ -u"
 
 # T11: prepend /opt/gcc-3.3/bin at beginning (prepend/begin+before)
 # note: /bin has a trailing slash
 export TESTPATH=/bin/:/usr/games/:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
 export RESULTPATH=/opt/gcc-3.3/bin:/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
-perform_test $RESULTPATH 0 "-p /opt/gcc-3.3/bin -B /bin"
+perform_test $RESULTPATH 0 "-B /bin -p /opt/gcc-3.3/bin"
 
 # T12: prepend /opt/gcc-3.3/bin at the end (append/end)
 export RESULTPATH=/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games:/opt/gcc-3.3/bin
@@ -129,10 +129,10 @@ perform_test $RESULTPATH 0 "-f /home/ulf/gnu/bin"
 
 # T15: remove 2nd /bin with after (remove-first/after)
 export RESULTPATH=/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/usr/bin/X11:/usr/games
-perform_test $RESULTPATH 0 "--remove-first /bin -A /usr/bin"
+perform_test $RESULTPATH 0 "-A /usr/bin --remove-first /bin"
 
 # T16: remove 2nd /bin with before (remove-first/before)
-perform_test $RESULTPATH 0 "--remove-first /bin -B /usr/bin/X11"
+perform_test $RESULTPATH 0 "-B /usr/bin/X11 --remove-first /bin"
 
 # T17: remove all /bin (remove-all)
 export RESULTPATH=/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/usr/bin/X11:/usr/games
@@ -148,19 +148,27 @@ perform_test $RESULTPATH 0 "-l /usr/games"
 
 # T20: remove 1st /usr/games (remove-last/after)
 export RESULTPATH=/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
-perform_test $RESULTPATH 0 "-l /usr/games -A /bin"
+perform_test $RESULTPATH 0 "-A /bin -l /usr/games"
 
 # T21: remove 1st /usr/games (remove-last/before)
 export RESULTPATH=/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
-perform_test $RESULTPATH 0 "-l /usr/games -B /home/ulf/gnu/bin"
+perform_test $RESULTPATH 0 "-B /home/ulf/gnu/bin -l /usr/games"
+
+# T22: multiple commands with same option
+export RESULTPATH=/bin:/first/path:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+perform_test $RESULTPATH 0 "-B /home/ulf/gnu/bin -l /usr/games -p /first/path"
+
+# T23: multiple commands with different options
+export RESULTPATH=/first/path:/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+perform_test $RESULTPATH 0 "-B /home/ulf/gnu/bin -l /usr/games -r -p /first/path"
 
 if [ "$prog_type" = "c++" ]; then
     TESTPATH=/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
     RESULTPATH=$TESTPATH
     perform_test $RESULTPATH 1 -f /path/does/not/exist 
     perform_test $RESULTPATH 0 -d /path/does/not/exist 
-    perform_test $RESULTPATH 1 -a /new/path -B /path/does/not/exist
-    perform_test $RESULTPATH 1 -p /new/path -A /path/does/not/exist
+    perform_test $RESULTPATH 1 -B /path/does/not/exist -a /new/path
+    perform_test $RESULTPATH 1 -A /path/does/not/exist -p /new/path
 fi
 
 echo "================================================================================"

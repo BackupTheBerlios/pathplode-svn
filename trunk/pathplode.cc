@@ -32,27 +32,15 @@ using namespace std;
 
 extern char *optarg;
 #include <getopt.h>
+#include <queue>
 #include "pathp_list.h"
 
-static bool uniquify_before = false;
-static bool uniquify_after = false;
-
-enum pp_cmd {
-  undefined,
-  uniquify,
-  remove_first,
-  remove_last,
-  remove_all,
-  append,
-  prepend,
-  list_paths
-};
 
 #define VERSION "0.3"
 
 #define USAGE "\n\
-Usage: pathplode [options] <command> PATH\n\
-Modify the incoming path as specified by command and options and give it to standard output.\n\
+Usage: pathplode [options] <command> [options] <command> ... PATH\n\
+Modify the incoming path as specified by the commands and options and print it to standard output.\n\
 Information:\n\
   --help (-h)\n\
   --version (-v)\n\
@@ -65,6 +53,7 @@ Commands:\n\
   --uniquify(-u): remove all multiple entries, just leaving the first one \n\
   --list(-t): List all path entries, each on its own line\n\
 Options:  \n\
+  --reset-options(-r): reset options to their default values for the following commands.\n\
   --unique(-U): remove multiple entries. Only the entry with the\n\
           highest priority is left over.\n\
   --after(-A) <anchor>: modify append/prepend to insert new element after\n\
@@ -80,6 +69,9 @@ Options:  \n\
            the behaviour to keep those slashes.\n\
   --allow-empty(-E): Allow empty entries. By default they are removed.\n\
   --colour(-C): colorize output - currently only affects the list command.\n\
+NOTE:\n\
+  The order of options matters! Every option affects only subsequent commands, until\n\
+  it is changed again. To remove all option use the --reset-options option.\n\
 Examples:\n\
   pathplode --uniquify ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:/usr/local/bin\n\
       -> ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games\n\
@@ -87,19 +79,55 @@ Examples:\n\
       -> ~/gnu/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games\n\
   pathplode --append ~/gnu/bin /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games\n\
       -> /usr/local/bin:/usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
-  pathplode --prepend ~/bin --after ~/gnu/bin /usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
+  pathplode --after ~/gnu/bin --prepend ~/bin /usr/bin:/bin:~/gnu/bin:/usr/bin/X11:/usr/games:~/gnu/bin\n\
       -> /usr/bin:/bin:~/gnu/bin:~/bin:/usr/bin/X11:/usr/games:~/gnu/bin";
 
 #define COPYING "\n\
-Copyright (C) 2004 Ulf Klaperski.\n\
+Copyright (C) 2004, 2005 Ulf Klaperski.\n\
 Pathplode comes with ABSOLUTELY NO WARRANTY.\n\
 You may redistribute copies of Pathplode\n\
 under the terms of the GNU General Public License.\n\
 For more information about these matters, see the file named COPYING.";
 
+static bool uniquify_before = false;
+static bool uniquify_after = false;
+static bool list_paths_occured = false;
+
+enum pp_cmd {
+  undefined,
+  uniquify,
+  remove_first,
+  remove_last,
+  remove_all,
+  append,
+  prepend,
+  list_paths,
+  before_elm,
+  after_elm,
+  colour,
+  allow_empty,
+  separator,
+  unique,
+  preserve_trailing_slash,
+  reset_options
+};
+
 string version_string = string("Pathplode, version ") + VERSION;
 const char usage_string[] = USAGE;
 const char copying_string[] = COPYING;
+
+// just a helper class to store command and argument in a list
+class cmd_with_arg {
+public:
+  cmd_with_arg(pp_cmd command, string argument) {
+    cmd=command;
+    arg=argument;
+  }
+  pp_cmd cmd;
+  string arg;
+};
+
+static queue<cmd_with_arg> commands;
 
 void process_options (int* argc, char** argv[], pp_cmd &command, string &command_arg,
                       pathp_list &pplist) {
@@ -114,6 +142,7 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
     {"uniquify", 0, 0, 'u'},
     {"prepend", 1, 0, 'p'},
     {"append", 1, 0, 'a'},
+    {"reset-options", 0, 0, 'r'},
     {"remove-first", 1, 0, 'f'},
     {"remove-last", 1, 0, 'l'},
     {"remove-all", 1, 0, 'd'},
@@ -129,7 +158,7 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
 
   while (1)
   {
-    c = getopt_long (*argc, *argv, "hvtup:a:f:l:d:A:B:CES:UP",
+    c = getopt_long (*argc, *argv, "hvtup:a:f:l:d:A:B:CrES:UP",
                      pathplode_options, &option_index);
     if (c<0) break;
 
@@ -145,33 +174,30 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         cout << copying_string << endl;
         exit(0);
       case 'u':
-        command = uniquify;
+        commands.push(cmd_with_arg(uniquify, ""));
         break;
       case 'p':
+        commands.push(cmd_with_arg(prepend, optarg));
         command = prepend;
         command_arg = optarg;
         break;
       case 'a':
-        command = append;
-        command_arg = optarg;
+        commands.push(cmd_with_arg(append, optarg));
         break;
       case 'f':
-        command = remove_first;
-        command_arg = optarg;
+        commands.push(cmd_with_arg(remove_first, optarg));
         break;
       case 'l':
-        command = remove_last;
-        command_arg = optarg;
+        commands.push(cmd_with_arg(remove_last, optarg));
         break;
       case 'd':
-        command = remove_all;
-        command_arg = optarg;
+        commands.push(cmd_with_arg(remove_all, optarg));
         break;
       case 't':
-        command = list_paths;
+        commands.push(cmd_with_arg(list_paths, optarg));
         break;
       case 'A':
-        pplist.set_hook(optarg, after);
+        commands.push(cmd_with_arg(after_elm, optarg));
         break;
       case 'E':
         break;
@@ -180,16 +206,19 @@ void process_options (int* argc, char** argv[], pp_cmd &command, string &command
         uniquify_after = true;
         break;
       case 'B':
-        pplist.set_hook(optarg, before);
+        commands.push(cmd_with_arg(before_elm, optarg));
+        break;
+      case 'r':
+        commands.push(cmd_with_arg(reset_options, ""));
         break;
       case 'C':
-        pplist.set_colour(true);
+        commands.push(cmd_with_arg(colour, optarg));
         break;
       case 'P':
         cout << c << " UNSUPPORTED!" << endl;
         break;
       case 'S':
-        pathp_list::set_separator(optarg[0]);
+        commands.push(cmd_with_arg(separator, optarg));
         break;
         
       default:
@@ -217,35 +246,60 @@ int main(int argc, char* argv[], char *env[]) {
   if (argc>0) path_list_in = argv[argc-1];
   all_paths = path_list_in;
 
-  if (uniquify_before) error_occured |= all_paths.uniquify();
-  switch (command) {
+  while(!commands.empty()) {
+    cmd_with_arg &next_command = commands.front();
+    switch (next_command.cmd) {
     case uniquify:
       error_occured |= all_paths.uniquify();
       break;
     case list_paths:
       error_occured |= all_paths.list_elements();
+      list_paths_occured = true;
       break;
     case append:
-      error_occured |= all_paths.append(command_arg);
+      error_occured |= all_paths.append(next_command.arg);
       break;
     case prepend:
-      error_occured |= all_paths.prepend(command_arg);
+      error_occured |= all_paths.prepend(next_command.arg);
       break;
     case remove_first:
-      error_occured |= all_paths.remove_first(command_arg);
+      error_occured |= all_paths.remove_first(next_command.arg);
       break;
     case remove_last:
-      error_occured |= all_paths.remove_last(command_arg);
+      error_occured |= all_paths.remove_last(next_command.arg);
       break;
     case remove_all:
-      error_occured |= all_paths.remove_all(command_arg);
+      error_occured |= all_paths.remove_all(next_command.arg);
+      break;
+    case before_elm:
+        all_paths.set_hook(next_command.arg, before);
+      break;
+    case after_elm:
+      all_paths.set_hook(next_command.arg, after);
+      break;
+    case reset_options:
+      all_paths.clear_hook();
+      all_paths.set_colour(false);
+      break;
+    case allow_empty:
+      //TODO (?)
+      break;
+    case preserve_trailing_slash:
+      //TODO (?)
+      break;
+    case colour:
+        all_paths.set_colour(true);
+      break;
+    case separator:
+      pathp_list::set_separator(next_command.arg[0]);
       break;
     default:
       cout << "Error: Illegal or no command!" << endl;
+    }
+    commands.pop();
   }
-  if (uniquify_after) error_occured |= all_paths.uniquify();
 
-  if (command != list_paths) {
+  if (!list_paths_occured) {
     cout << all_paths << endl;
   }
   

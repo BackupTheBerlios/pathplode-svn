@@ -1,5 +1,12 @@
 Hey Emacs, this is -*- outline -*-
 
+* Just now...
+
+** Fix choosing separator  
+** Fix slash removal
+** Fix empty entries
+** unique option is deprecated?
+
 * Enhancements & Open Concept Questions 
 ** allow several commands to be passed at once to prevent multiple pathplode calls
    Is it tolerable to have this solved by calling pathplode several times?

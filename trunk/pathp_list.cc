@@ -37,6 +37,7 @@ using namespace std;
 char pathp_list::separator_default = ':';
 bool pathp_list::purge_trailing_slash = true;
 
+
 #define REVERSE_ITERATOR_DOES_NOT_WORK
 
 int pathp_list::set_hook(string new_hook_pattern, location_position new_pattern_hook) {

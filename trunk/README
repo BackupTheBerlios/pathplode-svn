@@ -49,6 +49,19 @@ In the next releases the following changes are planned:
 
 - support for multiple commands with one program run
 
+******************** CHANGES
+
+0.3:
+
+First Release
+
+0.4:
+
+Allow multiple commands in one pathplode call. This includes the following changes:
+ - The --unique option is obsolete.
+ - Order matters! Options must now be given before the command. They stay in effect
+   until removed by the --reset-options (-r) option.
+
 ******************** LICENSE
 
 Pathplode is free software; you can redistribute it and/or modify
