@@ -10,5 +10,11 @@ pathplode: pathplode.o pathp_list.o
 
 pathp_list.o: pathp_list.h
 
+TAGS: *.cc *.h
+	etags -l c++ *.cc *.h
+
 clean:
 	rm -f *.o pathplode core
+
+distclean: clean
+	rm -f TAGS

@@ -61,7 +61,9 @@ public:
   static void set_separator(char new_sep) { pathp_list::separator_default=new_sep;}
   int set_hook(string new_hook_pattern, location_position new_pattern_hook);
 
+  void set_list_from_string(string path_string);
   inline void set_colour(bool new_val) { use_colour = new_val; }
+  pathp_list& operator=(const string path_string);
   
 private:
 

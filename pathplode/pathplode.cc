@@ -210,10 +210,12 @@ int main(int argc, char* argv[], char *env[]) {
   pp_cmd command = undefined;
   string command_arg = "";
   
-  string path_list_in(argv[argc-1]); 
-  pathp_list all_paths(path_list_in);
+  string path_list_in; 
+  pathp_list all_paths("");
   int error_occured = 0;
   process_options(&argc, &argv, command, command_arg, all_paths);
+  if (argc>0) path_list_in = argv[argc-1];
+  all_paths = path_list_in;
 
   if (uniquify_before) error_occured |= all_paths.uniquify();
   switch (command) {

@@ -49,12 +49,10 @@ int pathp_list::set_hook(string new_hook_pattern, location_position new_pattern_
   return 0;
 }
 
-
-// constructor from path string
-pathp_list::pathp_list(string path_string) {
+void pathp_list::set_list_from_string(string path_string) {
   int sep_pos;
-  separator = separator_default;
   string path_element;
+  paths.clear();
   do {
     sep_pos = path_string.find(separator);
     path_element = path_string.substr(0, sep_pos);
@@ -63,17 +61,28 @@ pathp_list::pathp_list(string path_string) {
     }    
     paths.push_back(path_element);
     path_string.erase(0, sep_pos+1);
-    pattern_hook = none;
-    use_colour = false;
-    // this is set to false for speed... if we have purge_trailing_slash (default)
-    // it is useless anyway
-    ignore_trailing_slash = false; 
   } while (sep_pos!=-1);
+}
+
+// constructor from path string
+pathp_list::pathp_list(string path_string) {
+  separator = separator_default;
+  this->set_list_from_string(path_string);
+  pattern_hook = none;
+  use_colour = false;
+  // this is set to false for speed... if we have purge_trailing_slash (default)
+  // it is useless anyway
+  ignore_trailing_slash = false; 
 }
 
 pathp_list::pathp_list(const pathp_list& src_pplst) {
   separator = src_pplst.separator;
   paths = src_pplst.paths;
+}
+
+pathp_list& pathp_list::operator=(string path_string) {
+  this->set_list_from_string(path_string);
+  return *this;
 }
 
 int pathp_list::prepend(string new_elm) {
