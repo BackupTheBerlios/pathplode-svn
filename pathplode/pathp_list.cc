@@ -197,6 +197,25 @@ void pathp_list::remove_last(string elm_to_remove) {
 }
 #endif
 
+void pathp_list::remove_all(string elm_to_remove) {
+  list<string>::iterator elm;
+  bool finished = false;
+  
+  if (purge_trailing_slash) {
+    path_unslash_r(elm_to_remove);
+  }
+  while (!finished) {
+    bool found = false;
+    elm = paths.begin();
+    while (elm != paths.end() && !found) {
+      if (*elm == elm_to_remove) found = true;
+      else elm++;
+    }
+    if (found) paths.erase(elm);
+    else finished=true;
+  }
+}
+
 void pathp_list::uniquify(void) {
   list<string> tmp_lst = this->paths;
   set<string> elms_found;

@@ -235,7 +235,7 @@ int main(int argc, char* argv[], char *env[]) {
       all_paths.remove_last(command_arg);
       break;
     case remove_all:
-      //all_paths.remove_all(command_arg); BUGBUG
+      all_paths.remove_all(command_arg);
       break;
     default:
       cout << "Error: Illegal or no command!" << endl;

@@ -55,6 +55,7 @@ public:
   void append(string new_elm);
   void remove_first(string elm_to_remove);
   void remove_last(string elm_to_remove);
+  void remove_all(string elm_to_remove);
   void uniquify(void);
   void list_elements(void);
   string to_string(void);
