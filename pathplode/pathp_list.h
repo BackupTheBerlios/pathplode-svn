@@ -16,6 +16,8 @@ enum location_position {
   after
 };
 
+void bail_out (string message);
+
 class pathp_list {
 public:
 

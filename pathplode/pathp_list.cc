@@ -14,6 +14,11 @@ bool pathp_list::purge_trailing_slash = true;
 
 #define REVERSE_ITERATOR_DOES_NOT_WORK
 
+void bail_out (string message) {
+  cerr << message << "!" << endl;
+  exit(1);
+}
+
 void pathp_list::set_hook(string new_hook_pattern, location_position new_pattern_hook) {
   if (pattern_hook!=none) {
     cerr << "Error: only one before/after regex must be defined!" << endl;
@@ -65,7 +70,7 @@ void pathp_list::prepend(string new_elm) {
       } else elm++;
     }
   } else found=true;
-  if (found==false) exit(1); // TODO: add better error handling
+  if (found==false) bail_out("Anchor not found during append");
   insert_iterator< list<string> > ins_elm(paths, elm);
   *ins_elm = new_elm;
 }
@@ -79,13 +84,13 @@ void pathp_list::append(string new_elm) {
   elm = paths.end();
   if (pattern_hook != none) {
     while (!found && --elm != paths.begin()) {
-      if (*elm == this->hook_pattern) { 
+      if (this->hook_pattern == *elm) { 
         found = true;
         if (pattern_hook==after) elm++;
-      } else elm--;
+      };
     }
   } else found=true;
-  if (found==false) exit(1); // TODO: add better error handling
+  if (found==false) bail_out("Anchor not found during append");
   insert_iterator< list<string> > ins_elm(paths, elm);
   *ins_elm = new_elm;
 }
