@@ -36,7 +36,7 @@ extern char *optarg;
 #include "pathp_list.h"
 
 
-#define VERSION "0.3"
+#define VERSION "0.5"
 
 #define USAGE "\n\
 Usage: pathplode [options] <command> [options] <command> ... PATH\n\
