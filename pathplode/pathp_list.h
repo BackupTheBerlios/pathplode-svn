@@ -1,6 +1,6 @@
 // hey emacs, this is a -*- c++ -*- file!
 //
-// $Id: $
+// $Id$
 
 #ifndef _PATHP_LIST_H
 #define _PATHP_LIST_H 1
@@ -11,7 +11,12 @@ using namespace std;
 
 class pathp_list {
 public:
+  // constructor
   pathp_list(string path_string);
+  // copy constructor
+  pathp_list(const pathp_list& src_pplst);
+  //
+  void uniquify(void);
   void list_elements(void);
   static void set_separator(char new_sep) { pathp_list::separator_default=new_sep;}
 private:

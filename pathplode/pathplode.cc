@@ -10,9 +10,17 @@ extern char *optarg;
 #include <getopt.h>
 #include "pathp_list.h"
 
+enum pp_cmd {
+  undefined,
+  uniquify,
+  remove_first,
+  remove_last,
+  append,
+  prepend,
+  list_path
+};
 
-
-void process_options (int* argc, char** argv[]) {
+void process_options (int* argc, char** argv[], pp_cmd &command) {
   int c;
   int option_index = 0;
 
@@ -48,6 +56,8 @@ void process_options (int* argc, char** argv[]) {
         cout << "HELP!" << endl;
         break;
       case 'u':
+        command = uniquify;
+        break;
       case 'A':
       case 'E':
       case 'U':
@@ -75,10 +85,21 @@ void process_options (int* argc, char** argv[]) {
   \param env[] C-String-Array der Umgebungsvariablen
 */
 int main(int argc, char* argv[], char *env[]) {
-  process_options(&argc, &argv);
+  pp_cmd command = undefined;
+  process_options(&argc, &argv, command);
   string path_list_in = argv[argc-1]; 
   pathp_list all_paths(path_list_in);
-  all_paths.list_elements();
+
+  switch (command) {
+    case uniquify:
+      all_paths.uniquify();
+    break;
+    default:
+      cout << "Error: Illegal or no command!" << endl;
+  }
+    
+  all_paths.list_elements();      
+
 //     cout << "Aufruf des Programms = "
 //          << argv[0] << endl;
 

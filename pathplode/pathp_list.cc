@@ -5,7 +5,8 @@
 // file
 //#include <config.h>
 #include "pathp_list.h"
-#include<iostream>
+#include <iostream>
+#include <set>
 using namespace std;
 
 char pathp_list::separator_default = ':';
@@ -22,6 +23,27 @@ pathp_list::pathp_list(string path_string) {
   } while (sep_pos!=-1);
            
 }
+
+pathp_list::pathp_list(const pathp_list& src_pplst) {
+  separator = src_pplst.separator;
+  paths = src_pplst.paths;
+}
+
+void pathp_list::uniquify(void) {
+  list<string> tmp_lst = this->paths;
+  set<string> elms_found;
+  this->paths.clear();
+  list<string>::iterator elm = tmp_lst.begin();
+
+  do {
+    if (elms_found.find(*elm) == elms_found.end()) {
+      elms_found.insert(*elm);
+      this->paths.push_back(*elm);
+    }
+    elm++;
+  } while (elm!=tmp_lst.end());
+}
+
 
 void pathp_list::list_elements(void) {
   list<string>::iterator element = paths.begin();
