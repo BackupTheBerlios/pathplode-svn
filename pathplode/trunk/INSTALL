@@ -1,0 +1,14 @@
+
+No sophisticated install flow yet...
+
+Requirements:
+
+- standards compliant C++ compiler (recommended: GNU g++)
+- standards compliant C++/STL library
+- POSIX environment
+
+To install it:
+
+- type "make"
+- copy binary pathplode to your PATH (e.g. /usr/local/bin)
+
