@@ -1,0 +1,20 @@
+
+No sophisticated install flow yet...
+
+Requirements:
+
+- standards compliant C++ compiler (recommended: GNU g++)
+- standards compliant C++/STL library
+- POSIX environment
+- GNU regex library
+
+To install it:
+
+- select the options in the Makefile
+- type "make"
+- copy binary pathplode to your PATH (e.g. /usr/local/bin)
+
+For help:
+
+pathplode --help
+
