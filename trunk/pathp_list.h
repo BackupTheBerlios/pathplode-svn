@@ -33,6 +33,10 @@
 #include <string>
 #include <list>
 #include <iostream>
+extern "C" {
+#include <sys/types.h>
+#include <regex.h>
+}
 using namespace std;
 
 enum location_position {
@@ -67,7 +71,10 @@ public:
   pathp_list& operator=(const string path_string);
   void set_purge_trailing_slash(bool new_val) { purge_trailing_slash = new_val; };
   void set_allow_empty(bool new_val) { allow_empty=new_val; }
-  
+  bool match_elm(string candidate, string pattern);
+  bool match_regex(string candidate, string pattern);
+  void set_use_regex(bool new_val) { use_regex = new_val; };
+
 private:
 
   
@@ -88,6 +95,7 @@ private:
   string hook_pattern;
   location_position pattern_hook;
   bool use_colour;
+  bool use_regex;
   bool allow_empty;
   bool ignore_trailing_slash; // in comparisons.. so /bin and /bin/ is the same
   static char separator_default;

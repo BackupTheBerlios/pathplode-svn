@@ -37,6 +37,17 @@ using namespace std;
 char pathp_list::separator_default = ':';
 bool pathp_list::purge_trailing_slash = true;
 
+bool pathp_list::match_elm(string candidate, string pattern) {
+  if (use_regex) return match_regex(candidate, pattern);
+  else return (candidate==pattern);
+}
+
+bool pathp_list::match_regex(string candidate, string pattern) {
+  regex_t pattern_compiled;
+  regcomp(&pattern_compiled, pattern.c_str(), REG_NOSUB);
+  return (regexec(&pattern_compiled, candidate.c_str(), 0, 0, 0)==0);
+}
+
 
 #define REVERSE_ITERATOR_DOES_NOT_WORK
 
@@ -72,8 +83,9 @@ pathp_list::pathp_list(string path_string) {
   separator = separator_default;
   this->set_list_from_string(path_string);
   pattern_hook = none;
-  allow_empty=false;
+  allow_empty = false;
   use_colour = false;
+  use_regex = false;
   // this is set to false for speed... if we have purge_trailing_slash (default)
   // it is useless anyway
   ignore_trailing_slash = false; 
@@ -82,11 +94,6 @@ pathp_list::pathp_list(string path_string) {
 pathp_list::pathp_list(const pathp_list& src_pplst) {
   separator = src_pplst.separator;
   paths = src_pplst.paths;
-}
-
-pathp_list& pathp_list::operator=(string path_string) {
-  this->set_list_from_string(path_string);
-  return *this;
 }
 
 int pathp_list::prepend(string new_elm) {
@@ -237,7 +244,7 @@ int pathp_list::remove_all(string elm_to_remove) {
     bool found = false;
     elm = paths.begin();
     while (elm != paths.end() && !found) {
-      if (*elm == elm_to_remove) found = true;
+      if (match_elm(*elm, elm_to_remove)) found = true;
       else elm++;
     }
     if (found) paths.erase(elm);

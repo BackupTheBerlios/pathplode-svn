@@ -106,7 +106,6 @@ enum pp_cmd {
   before_elm,
   after_elm,
   colour,
-  allow_empty,
   reset_options
 };
 
@@ -242,7 +241,7 @@ int main(int argc, char* argv[], char *env[]) {
   int error_occured = 0;
   process_options(&argc, &argv, command, command_arg, all_paths);
   if (argc>0) path_list_in = argv[argc-1];
-  all_paths = path_list_in;
+  all_paths.set_list_from_string(path_list_in);
 
   if (unique_opt) error_occured |= all_paths.uniquify();
 
