@@ -7,6 +7,7 @@
 
 #include <string>
 #include <list>
+#include <iostream>
 using namespace std;
 
 enum location_position {
@@ -36,15 +37,15 @@ public:
 
 private:
 
-  inline string path_unslash(string path) {
+  
+  inline void path_unslash_r(string &path) {
     int path_len = path.length();
     if (path_len>1 && path.substr(path_len-1)=="/") path.resize(path_len-1);
-    return path;
   }
 
   inline string path_maybe_unslashed(string path) {
     if (ignore_trailing_slash) {
-      path_unslash(path);
+      path_unslash_r(path);
     }
     return path;
   }

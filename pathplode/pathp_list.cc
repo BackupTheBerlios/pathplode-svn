@@ -33,7 +33,7 @@ pathp_list::pathp_list(string path_string) {
     sep_pos = path_string.find(separator);
     path_element = path_string.substr(0, sep_pos);
     if (purge_trailing_slash) {
-      path_element = path_unslash(path_element);
+      path_unslash_r(path_element);
     }    
     paths.push_back(path_element);
     path_string.erase(0, sep_pos+1);
@@ -42,7 +42,6 @@ pathp_list::pathp_list(string path_string) {
     // it is useless anyway
     ignore_trailing_slash = false; 
   } while (sep_pos!=-1);
-           
 }
 
 pathp_list::pathp_list(const pathp_list& src_pplst) {
@@ -53,6 +52,9 @@ pathp_list::pathp_list(const pathp_list& src_pplst) {
 void pathp_list::prepend(string new_elm) {
   list<string>::iterator elm;
   bool found = false;
+  if (purge_trailing_slash) {
+    path_unslash_r(new_elm);
+  }
   elm = paths.begin();
   if (pattern_hook != none) {
     while (elm != paths.end() && !found) { 
@@ -70,6 +72,9 @@ void pathp_list::prepend(string new_elm) {
 void pathp_list::append(string new_elm) {
   list<string>::iterator elm;
   bool found = false;
+  if (purge_trailing_slash) {
+    path_unslash_r(new_elm);
+  }
   elm = paths.end();
   if (pattern_hook != none) {
     while (!found && --elm != paths.begin()) {
@@ -88,6 +93,9 @@ void pathp_list::remove_first(string elm_to_remove) {
   list<string>::iterator elm_last = paths.end();
   list<string>::iterator elm_next;
   bool found = false;
+  if (purge_trailing_slash) {
+    path_unslash_r(elm_to_remove);
+  }
   elm = paths.begin();
   while (elm != paths.end() && !found) {
     elm_next=elm; elm_next++;
