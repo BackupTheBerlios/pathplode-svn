@@ -2,7 +2,10 @@
 #
 # test suite for pathplode
 #
-# $Id: $
+# (c) 2003 Ulf Klaperski
+#
+#
+# $Id:$
 
 tests=0
 tests_ok=0
