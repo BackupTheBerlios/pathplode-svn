@@ -1,4 +1,6 @@
 
+# $Id$
+
 CXXFLAGS=-g -Wall
 
 pathplode: pathplode.o pathp_list.o
@@ -8,4 +10,4 @@ pathplode: pathplode.o pathp_list.o
 pathp_list.o: pathp_list.h
 
 clean:
-	rm -f *.o pathplode
+	rm -f *.o pathplode core

@@ -5,7 +5,20 @@
 # (c) 2003 Ulf Klaperski
 #
 #
-# $Id:$
+# $Id$
+
+prog_type=$1
+
+if [ "$prog_type" = "c++" ]; then
+    binary=./pathplode
+    has_regex=1
+elif [ "$prog_type" = "perl" ]; then
+    binary=./pathplode.pl
+    has_regex=0
+else
+    echo "Must give 'c++' or 'perl' as argument!"
+    exit 1
+fi
 
 tests=0
 tests_ok=0
@@ -14,20 +27,20 @@ tests_failed=0
 perform_test () {
     expect=$1
     shift
-    result=`./pathplode.pl $@ $TESTPATH`;
+    result=`$binary $@ $TESTPATH`;
     status=$?
-    if [ $status -ne 0 ]; then
-	echo "Warning: NON-ZERO exit status"
-    fi
 
     echo "================================================================================"
     echo "Testpath: $TESTPATH"
     echo "Command:  $@"
     echo "Result:   $result"
+    if [ $status -ne 0 ]; then
+	echo "Warning: NON-ZERO exit status $status. Forcing FAIL status."
+    fi
 
     let "tests += 1"
-    if [ "$result" = "$expect" ]; then
-	echo "OK!"
+    if [ "$result" == "$expect" -a $status -eq 0 ]; then
+	echo 'OK!'
 	let "tests_ok += 1"
     else 
 	echo "FAIL: expected $expect"
@@ -42,16 +55,22 @@ echo $TESTPATH
 # T0: uniquify command
 perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/usr/bin/X11" "--uniquify"
 # T1: insert /opt/bin after the first and only entry that contains "gnu"
-perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/opt/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "--prepend /opt/bin --after gnu"
+if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/opt/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "--prepend /opt/bin --after $hook"
 # T2: insert /opt/bin before the first and only entry that contains "gnu"
-perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "--prepend /opt/bin --before gnu"
+if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "--prepend /opt/bin --before $hook"
 # T3: T2 with short options, wrong call (-p must be lower case), no change!
-perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-P /opt/bin -B gnu"
+if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-P /opt/bin -B $hook"
 # T4: insert /opt/bin before the first and only entry that contains "gnu" with mixed options -> T2
-perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-p /opt/bin --before gnu"
+if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-p /opt/bin --before $hook"
 # T5: insert /opt/bin before the last and only entry that contains "gnu" with short options
-perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-a /opt/bin -B gnu"
+if [ has_regex = 1 ]; then hook="gnu"; else hook="/home/ulf/gnu/bin"; fi
+perform_test "/bin:/usr/games:/opt/bin:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games" "-a /opt/bin -B $hook"
 # T6: insert /opt/bin after the last entry that contains "bin" with short options
+if [ has_regex = 1 ]; then hook="bin"; else hook="/opt/bin"; fi
 perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/opt/bin:/usr/games" "-a /opt/bin -A bin"
 # T7: insert UPPERCASE_PATH after last entry that contains "local/"
 perform_test "/bin:/usr/games:/home/ulf/gnu/bin:/home/ulf/bin:/usr/local/bin:UPPERCASE_PATH:/usr/bin:/usr/bin/X11" "-a UPPERCASE_PATH -A local/ -U"
