@@ -23,7 +23,7 @@
 #
 ###############################################################################
 #
-# $Id: $
+# $Id$
 #
 ###############################################################################
 
@@ -33,7 +33,7 @@ GetOptions ('help|h!' => \$help,
 	    'uniquify|u!' => \$uniquify,
 	    'unique|U!' => \$unique,
 	    'separator|S' => \$separator,
-	    'list!' => \$list,
+	    'list|t!' => \$list,
 	    'prepend|p=s' => \$prepend,
 	    'append|a=s' => \$append,
 	    'remove-first|f=s' => \$remove_first,

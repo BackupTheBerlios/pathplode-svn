@@ -1,3 +1,4 @@
 
-pathplode: pathplode.o
-	g++ pathplode.o   -o pathplode
+pathplode: pathplode.o pathp_list.o
+	g++ pathplode.o pathp_list.o  -o pathplode
+

@@ -7,7 +7,7 @@
 using namespace std;
 
 #include <getopt.h>
-#include "ixpath.h"
+#include "pathp_list.h"
 
 
 
@@ -73,6 +73,9 @@ void process_options (int argc, char* argv[]) {
 */
 int main(int argc, char* argv[], char *env[]) {
   process_options(argc, argv);
+  string path_list_in = argv[1]; 
+  pathp_list all_paths(path_list_in);
+  all_paths.list_elements();
 //     cout << "Aufruf des Programms = "
 //          << argv[0] << endl;
 
