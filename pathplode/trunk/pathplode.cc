@@ -48,7 +48,7 @@ enum pp_cmd {
   list_paths
 };
 
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 #define USAGE "\n\
 Usage: pathplode [options] <command> PATH\n\
